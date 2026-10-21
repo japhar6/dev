@@ -22,7 +22,7 @@ pipeline {
 
         stage('Unit Test Execution') {
             steps {
-                bat 'mvn -B test'
+               bat 'mvn -B commande-inexistante'
             }
         }
 
