@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -6,31 +7,46 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('git checkout') {
             steps {
-                checkout scm
+                git branch: 'master',
+                    url: 'https://github.com/japhar6/dev.git'
             }
         }
 
-        stage('Build et tests Maven') {
+        stage('Build') {
             steps {
-                bat 'mvn -B clean verify'
+                bat 'mvn -B compile'
             }
         }
 
-        stage('Construction Docker') {
+        stage('Unit Test Execution') {
             steps {
-                bat 'docker build -t jenkins-tp2:1.0 .'
+                bat 'mvn -B test'
             }
         }
-    }
 
-    post {
-        success {
-            echo 'Pipeline reussi : Maven, tests et Docker.'
+        stage('Build the docker image') {
+            steps {
+                bat 'mvn -B package -DskipTests'
+                bat 'docker build --tag japhar06/jenkins-tp2:1.0.0 .'
+            }
         }
-        failure {
-            echo 'Echec du pipeline. Consulter la console.'
+
+        stage('Push the docker image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKERHUB_USER',
+                    passwordVariable: 'DOCKERHUB_TOKEN'
+                )]) {
+                    bat '''
+                        @echo off
+                        echo %DOCKERHUB_TOKEN%| docker login -u %DOCKERHUB_USER% --password-stdin
+                        docker push %DOCKERHUB_USER%/jenkins-tp2:1.0.0
+                    '''
+                }
+            }
         }
     }
 }
