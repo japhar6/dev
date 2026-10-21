@@ -49,4 +49,17 @@ pipeline {
             }
         }
     }
+        post {
+        failure {
+            emailext(
+                subject: "ECHEC du pipeline Jenkins : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Le pipeline Jenkins a échoué.
+
+Job : ${env.JOB_NAME}
+Build : #${env.BUILD_NUMBER}
+Consultez les logs : ${env.BUILD_URL}""",
+                to: "TON_ADRESSE_GMAIL"
+            )
+        }
+    }
 }
