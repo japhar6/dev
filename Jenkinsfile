@@ -16,7 +16,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat 'mvn -B compile'
+                bat 'mvn -B commande-inexistante'
             }
         }
 
